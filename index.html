@@ -22,15 +22,27 @@
       font-size: 16px;
       color: #888;
     }
+    .copy-buttons {
+      margin-top: 30px;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h1 id="otp">------</h1>
   <div id="timer">남은 시간: 30초</div>
-  <p>30초마다 자동 갱신됩니다</p>
+
+  <div class="copy-buttons">
+    <button id="emailBtn" onclick="copyToClipboard('sunringpt24@gmail.com', 'emailBtn')">이메일 복사</button>
+    <button id="passwordBtn" onclick="copyToClipboard('sunrinchatgpt24!!', 'passwordBtn')">비밀번호 복사</button>
+  </div>
 
   <script>
-    // Base32 디코더
     function base32toUint8Array(base32) {
       const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
       let bits = "";
@@ -53,7 +65,7 @@
       const timestep = Math.floor(epoch / 30);
       const msg = new ArrayBuffer(8);
       const view = new DataView(msg);
-      view.setUint32(4, timestep); // 하위 4바이트만 사용
+      view.setUint32(4, timestep);
 
       const cryptoKey = await crypto.subtle.importKey(
         "raw",
@@ -70,8 +82,7 @@
         ((hmac[offset + 1] & 0xff) << 16) |
         ((hmac[offset + 2] & 0xff) << 8) |
         (hmac[offset + 3] & 0xff);
-      const otp = (bin_code % 1000000).toString().padStart(6, "0");
-      return otp;
+      return (bin_code % 1000000).toString().padStart(6, "0");
     }
 
     const secret = 'XNUPIIHNPM4VVBVXV6ZEW32S5ZCLSELV';
@@ -88,6 +99,17 @@
       if (remaining === 30) {
         updateOTP();
       }
+    }
+
+    function copyToClipboard(text, buttonId) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(buttonId);
+        const originalText = btn.textContent;
+        btn.textContent = '복사완료';
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 1000);
+      });
     }
 
     updateOTP();
